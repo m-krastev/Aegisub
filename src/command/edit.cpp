@@ -65,6 +65,7 @@
 #include <boost/range/adaptor/transformed.hpp>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
+#include <boost/format.hpp>
 
 #include <wx/clipbrd.h>
 #include <wx/fontdlg.h>
@@ -784,7 +785,7 @@ static void combine_concat(AssDialogue *first, AssDialogue *second) {
 
 static void combine_dialogue(AssDialogue *first, AssDialogue *second) {
     if (second) {
-        auto format_option = OPT_GET("Subtitle/Grid/Join as Dialogue Format");
+        auto format_option = OPT_GET("Subtitle/Grid/Join as Dialogue Format") -> GetString();
         auto first_text = first->Text.get();
         auto second_text = second->Text.get();
         auto newline = OPT_GET("Subtitle/Edit Box/Soft Line Break")->GetBool() ? "\\n" : "\\N";
@@ -794,9 +795,7 @@ static void combine_dialogue(AssDialogue *first, AssDialogue *second) {
         boost::replace_all(second_text, newline, " ");
         boost::replace_all(format_option, "{}", "%s");
 
-        std::string combined_text;
-        std::sprintf(combined_text, format_option, first_text, second_text)
-        first->Text = combined_text;
+        first->Text = (boost::format(format_option) % first_text % second_text).str();
     }
 }
 
