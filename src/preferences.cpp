@@ -225,13 +225,10 @@ void Interface(wxTreebook *book, Preferences *parent) {
 	p->OptionAdd(grid, _("Highlight visible subtitles"), "Subtitle/Grid/Highlight Subtitles in Frame");
 	p->OptionAdd(grid, _("Hide overrides symbol"), "Subtitle/Grid/Hide Overrides Char");
 	p->OptionFont(grid, "Subtitle/Grid/");
+    p->OptionAdd(grid, _("Join as Dialogue Format"), "Subtitle/Grid/Join as Dialogue Format");
 
 	auto tl_assistant = p->PageSizer(_("Translation Assistant"));
 	p->OptionAdd(tl_assistant, _("Skip over whitespace"), "Tool/Translation Assistant/Skip Whitespace");
-
-    const wxString cdialogue_pref[4] = { _("Dash second line with space"), _("Dash second line without space"), _("Dash both lines with space"), _("Dash both lines without space") };
-    wxArrayString dialogue_pref(4, cdialogue_pref);
-    p->OptionChoice(grid, _("Join as Dialogue Format"), dialogue_pref, "Subtitle/Grid/Join as Dialogue Format");
 
 	p->SetSizerAndFit(p->sizer);
 }

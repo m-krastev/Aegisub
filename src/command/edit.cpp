@@ -112,13 +112,6 @@ std::unique_ptr<AssDialogue> get_dialogue(String data) {
 	}
 }
 
-enum class JoinDialogueFormat {
-    DashSecondLineWithSpace,
-    DashSecondLineWithoutSpace,
-    DashBothLinesWithSpace,
-    DashBothLinesWithoutSpace
-};
-
 template<typename Paster>
 void paste_lines(agi::Context *c, bool paste_over, Paster&& paste_line) {
 	std::string data = GetClipboard();
@@ -792,35 +785,17 @@ static void combine_concat(AssDialogue *first, AssDialogue *second) {
 static void combine_dialogue(AssDialogue *first, AssDialogue *second) {
     if (second) {
         auto format_option = OPT_GET("Subtitle/Grid/Join as Dialogue Format");
-        JoinDialogueFormat format = JoinDialogueFormat::DashSecondLineWithSpace;
+        auto first_text = first->Text.get();
+        auto second_text = second->Text.get();
+        auto newline = OPT_GET("Subtitle/Edit Box/Soft Line Break")->GetBool() ? "\\n" : "\\N";
 
-        if (format_option) {
-            format = static_cast<JoinDialogueFormat>(format_option->GetInt());
-        }
-
-        std::string first_text = first->Text.get();
-        std::string second_text = second ? second->Text.get() : "";
-        std::string newline = OPT_GET("Subtitle/Edit Box/Soft Line Break")->GetBool() ? "\\n" : "\\N";
-
-        // Remove newlines from the lines to be merged
+        // Remove breaks from the lines to be merged
         boost::replace_all(first_text, newline, " ");
         boost::replace_all(second_text, newline, " ");
+        boost::replace_all(format_option, "{}", "%s");
 
-        std::string combined_text = "";
-        switch (format) {
-        case JoinDialogueFormat::DashSecondLineWithSpace:
-            combined_text = first_text + newline + "- " + second_text;
-            break;
-        case JoinDialogueFormat::DashSecondLineWithoutSpace:
-            combined_text = first_text + newline + "-" + second_text;
-            break;
-        case JoinDialogueFormat::DashBothLinesWithSpace:
-            combined_text = "- " + first_text + newline + "- " + second_text;
-            break;
-        case JoinDialogueFormat::DashBothLinesWithoutSpace:
-            combined_text = "-" + first_text + newline + "-" + second_text;
-            break;
-        }
+        std::string combined_text;
+        std::sprintf(combined_text, format_option, first_text, second_text)
         first->Text = combined_text;
     }
 }
