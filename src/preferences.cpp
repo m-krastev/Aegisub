@@ -234,6 +234,7 @@ void Interface(wxTreebook *book, Preferences *parent) {
 	p->OptionAdd(grid, _("Highlight visible subtitles"), "Subtitle/Grid/Highlight Subtitles in Frame");
 	p->OptionAdd(grid, _("Hide overrides symbol"), "Subtitle/Grid/Hide Overrides Char");
 	p->OptionFont(grid, "Subtitle/Grid/");
+    p->OptionAdd(grid, _("Join as Dialogue Format"), "Subtitle/Grid/Join as Dialogue Format");
 
 	auto tl_assistant = p->PageSizer(_("Translation Assistant"));
 	p->OptionAdd(tl_assistant, _("Skip over whitespace"), "Tool/Translation Assistant/Skip Whitespace");

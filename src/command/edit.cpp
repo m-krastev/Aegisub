@@ -65,6 +65,7 @@
 #include <boost/range/adaptor/transformed.hpp>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
+#include <boost/format.hpp>
 
 #include <wx/clipbrd.h>
 #include <wx/fontdlg.h>
@@ -781,7 +782,35 @@ static void combine_concat(AssDialogue *first, AssDialogue *second) {
 		first->Text = agi::Str(first->Text.get(), " ", second->Text.get());
 }
 
+
+static void combine_dialogue(AssDialogue *first, AssDialogue *second) {
+    if (second) {
+        auto format_option = OPT_GET("Subtitle/Grid/Join as Dialogue Format") -> GetString();
+        auto first_text = first->Text.get();
+        auto second_text = second->Text.get();
+        auto newline = OPT_GET("Subtitle/Edit Box/Soft Line Break")->GetBool() ? "\\n" : "\\N";
+
+        // Remove breaks from the lines to be merged
+        boost::replace_all(first_text, newline, " ");
+        boost::replace_all(second_text, newline, " ");
+        boost::replace_all(format_option, "{}", "%s");
+
+        first->Text = (boost::format(format_option) % first_text % second_text).str();
+    }
+}
+
 static void combine_drop(AssDialogue *, AssDialogue *) { }
+
+struct edit_line_join_dialogue final : public validate_sel_multiple {
+    CMD_NAME("edit/line/join/dialogue")
+    STR_MENU("Join &Dialogue")
+    STR_DISP("Join Dialogue")
+    STR_HELP("Join selected lines in a single one, concatenating dialogue together")
+
+    void operator()(agi::Context *c) override {
+        combine_lines(c, combine_dialogue, _("join dialogue"));
+    }
+};
 
 struct edit_line_join_as_karaoke final : public validate_sel_multiple {
 	CMD_NAME("edit/line/join/as_karaoke")
@@ -1283,6 +1312,7 @@ namespace cmd {
 		reg(std::make_unique<edit_line_duplicate_shift>());
 		reg(std::make_unique<edit_line_duplicate_shift_back>());
 		reg(std::make_unique<edit_line_join_as_karaoke>());
+        reg(std::make_unique<edit_line_join_dialogue>());
 		reg(std::make_unique<edit_line_join_concatenate>());
 		reg(std::make_unique<edit_line_join_keep_first>());
 		reg(std::make_unique<edit_line_paste>());
